@@ -1,0 +1,14 @@
+{
+  "api": "v1",
+  "description": "群内真实艾特问答，已开放账号可直接私聊文字问答",
+  "requires": [
+    "group.text.receive",
+    "group.text.send"
+  ],
+  "business": [
+    {
+      "function": "Plugin.reply_to_member",
+      "label": "生成并发送对话回复"
+    }
+  ]
+}

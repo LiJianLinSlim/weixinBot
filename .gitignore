@@ -1,0 +1,70 @@
+# Local account, group and model settings
+/bot_config.json
+/members_config.json
+/llm_config.json
+/tts_config.json
+.env
+.env.*
+!.env.example
+private_markers.*
+
+# Runtime data, messages, logs and caches
+.runtime/
+logs/
+__pycache__/
+*.py[cod]
+*.sqlite*
+*.db
+*.db-*
+*.log
+*.log.*
+*.dmp
+*.bak
+*.tmp
+.venv/
+venv/
+
+# Build output; only the required bridges are distributed
+native/.build/
+*.obj
+*.lib
+*.exp
+*.pdb
+*.exe
+*.dll
+!native/build/selftest_bridge.dll
+!native/build_text/text_bridge.dll
+!native/build_article/article_bridge.dll
+*.zip
+*.7z
+*.rar
+dist/
+
+# Editor and desktop metadata
+.impeccable/questions/
+.impeccable/review/
+.impeccable/build/
+.idea/
+.vscode/
+
+# Documentation dependencies and generated pages
+/node_modules/
+/docs/.vitepress/cache/
+/docs/.vitepress/dist/
+/docs/.vitepress/.temp/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Historical wxbot copies and reverse engineering workspaces
+/adaptation_*/
+/snapshot_*/
+/ghidra_*/
+/wxbot-main/
+/config.json
+/search_config.json
+/Helper_*.dll
+
+# Local routing and visual workflow state
+/routing_config.json
+/.yo-dev/

@@ -1,0 +1,285 @@
+#pragma once
+// Canonical RVAs name the verified 4.1.15.13 targets. Select only an exact,
+// hash-verified build and reject every unmapped feature in partial profiles.
+struct CoreBuild {
+    LONG id;
+    uint64_t bytes;
+    uint32_t timestamp, image_size;
+    unsigned char sha256[32];
+};
+static constexpr CoreBuild core_builds[] = {
+    {4, 205932072ull, 0x6ae33707, 0xc4db000, {0x2b,0x36,0x77,0xc3,0xf9,0x32,0xda,0xaa,0x4e,0xf8,0x4c,0x8b,0x2a,0xcd,0x0a,0xee,0x12,0xcb,0xe5,0xa7,0x79,0xff,0x9e,0x74,0x0c,0x37,0x07,0x61,0xe5,0xc2,0x91,0xce}},
+    {1, 201552944ull, 0x6ab0a378, 0xc0ae000, {0x10,0xf8,0xe9,0x95,0x45,0x3e,0x2d,0xa4,0x6d,0x4f,0x2b,0x50,0x80,0xcd,0x6d,0xa1,0xf1,0x3c,0xc5,0x14,0x77,0x46,0xad,0xc1,0x19,0xce,0xae,0x38,0xcb,0x03,0x9d,0xe5}},
+    {2, 204305968ull, 0x6ad083c8, 0xc34f000, {0xe0,0x42,0x8a,0x7b,0x69,0x18,0x53,0xde,0x49,0x65,0x32,0x52,0x3c,0x2c,0x09,0xaa,0x09,0x5f,0x90,0x94,0x1c,0x37,0xc9,0xf4,0xcf,0xb3,0xf1,0x37,0xf3,0xc6,0x65,0x56}},
+    {3, 205929008ull, 0x6ae0a8d1, 0xc4dc000, {0x74,0x5c,0xdf,0x29,0x55,0xfa,0x51,0x28,0xcd,0xb0,0x0c,0x05,0x6c,0x97,0x57,0x11,0x56,0xa5,0xf1,0x07,0x40,0x6a,0x9b,0xb1,0x5a,0xc0,0x75,0x4f,0x32,0x46,0xb2,0x01}},
+    {5, 204027440ull, 0x6aec3c6a, 0xc30b000, {0x42,0xd3,0xea,0x2f,0x42,0x74,0xb9,0xe3,0xb2,0x2a,0xe0,0xc5,0x52,0x13,0x78,0x9e,0x9f,0xc6,0x21,0xdd,0xf7,0x99,0x1a,0xb0,0xa9,0x9c,0xee,0x2e,0xa0,0xbb,0xed,0xc1}}
+};
+static volatile LONG core_profile_id = 0;
+static bool core_size_supported(uint64_t bytes) {
+    for (const auto& build: core_builds) if (build.bytes == bytes) return true;
+    return false;
+}
+static bool core_select_build(uint64_t bytes, const unsigned char* digest,
+                              uint32_t timestamp, uint32_t image_size) {
+    for (const auto& build: core_builds) {
+        if (build.bytes == bytes && build.timestamp == timestamp && build.image_size == image_size &&
+                std::equal(build.sha256, build.sha256+32, digest)) {
+            InterlockedExchange(&core_profile_id, build.id);
+            return true;
+        }
+    }
+    return false;
+}
+static uintptr_t core_rva_42050(uintptr_t legacy) {
+    switch (legacy) {
+        case 0xb912690: return 0xbb4de28;
+        case 0x8d804e8: return 0x90070e8;
+        case 0x8dfe2f8: return 0x90b8d18;
+        case 0x469a0: return 0x20920;
+        case 0x36f930: return 0x358360;
+        case 0x36c7b0: return 0x3551e0;
+        case 0x45d10: return 0x1fc90;
+        case 0x47220: return 0x211a0;
+        case 0x47310: return 0x21290;
+        case 0x2fb010: return 0x2e32e0;
+        case 0x6f4c70: return 0x6fe900;
+        case 0x178f100: return 0x175ce00;
+        case 0x17b9010: return 0x1787b10;
+        case 0x54b02f0: return 0x56e48d0;
+        case 0x8e53588: return 0x9112508;
+        case 0x74ab89c: return 0x7754e5c;
+        case 0x74ab8e0: return 0x7754ea0;
+        default: return 0;
+    }
+}
+
+static uintptr_t core_rva(uintptr_t legacy) {
+    const LONG profile = InterlockedCompareExchange(&core_profile_id, 0, 0);
+    if (profile == 1) return legacy;
+    if (profile == 5) return core_rva_42050(legacy);
+    if (profile == 4) {
+        switch (legacy) {
+            case 0x45d10: return 0x45d10;
+            case 0x47220: return 0x47220;
+            case 0x47310: return 0x47310;
+            case 0x2fb010: return 0x311990;
+            case 0x6f4c70: return 0x71b260;
+            case 0x178f100: return 0x17ce4c0;
+            case 0x17b9010: return 0x17f86c0;
+            case 0x229e790: return 0x23ab750;
+            case 0x54b02f0: return 0x5721040;
+            case 0x8e53588: return 0x912d238;
+            case 0x74ab89c: return 0x76a53bc;
+            case 0x74ab8e0: return 0x76a5400;
+            case 0xb912690: return 0xbd0ce30;
+            case 0x8d804e8: return 0x9055b98;
+            case 0x8dfe2f8: return 0x90d5f68;
+            case 0x7a60: return 0x7a60;
+            case 0x857a0: return 0x857a0;
+            case 0x9b5d0: return 0x9b5e0;
+            case 0x9f4b0: return 0x9f4c0;
+            case 0x36c740: return 0x384730;
+            case 0x389830: return 0x3a1880;
+            case 0x57fe90: return 0x59b330;
+            case 0x6f4d90: return 0x71b380;
+            case 0x2bab360: return 0x2cc74e0;
+            case 0x22d8390: return 0x23e5780;
+            case 0x3d9d990: return 0x3ec6850;
+            case 0x6be0020: return 0x6e53af0;
+            case 0x8e53718: return 0x912d3c8;
+            case 0x9af9078: return 0x9e27e18;
+            case 0x8edb0: return 0x8edb0;
+            case 0x10e390: return 0x115010;
+            case 0x356dd0: return 0x36edc0;
+            case 0xe5c720: return 0xea2be0;
+            case 0x2ba5330: return 0x2cc14b0;
+            case 0x2ba7940: return 0x2cc3ab0;
+            case 0x5240720: return 0x54bffd0;
+            case 0x8dfb4b8: return 0x90d3120;
+            case 0x97ca198: return 0x9af46b8;
+            case 0x88ad0: return 0x88ad0;
+            case 0x754330: return 0x77b270;
+            case 0x7544b0: return 0x77b3f0;
+            case 0x1a26440: return 0x1a69dc0;
+            case 0x3866510: return 0x3959710;
+            case 0x8d9f958: return 0x9075ec8;
+            default: return 0;
+        }
+    }
+    if (profile == 3) {
+        // 4.2.0.11: verified text, recall and media send/download paths.
+        switch (legacy) {
+            case 0x2010: return 0x2010;
+            case 0x45d10: return 0x45d10;
+            case 0x47220: return 0x47220;
+            case 0x47310: return 0x47310;
+            case 0x2fb010: return 0x311990;
+            case 0x6f4c70: return 0x71c4e0;
+            case 0x178f100: return 0x17cf210;
+            case 0x17b9010: return 0x17f9410;
+            case 0x229e790: return 0x23abce0;
+            case 0x54b02f0: return 0x571fd20;
+            case 0x8e53588: return 0x912c258;
+            case 0x74ab89c: return 0x76a43bc;
+            case 0x74ab8e0: return 0x76a4400;
+            case 0x7a60: return 0x7a60;
+            case 0x857a0: return 0x857a0;
+            case 0x9b5d0: return 0x9b5e0;
+            case 0x9f4b0: return 0x9f4c0;
+            case 0x36c740: return 0x384730;
+            case 0x389830: return 0x3a1880;
+            case 0x57fe90: return 0x59c5b0;
+            case 0x6f4d90: return 0x71c600;
+            case 0x2bab360: return 0x2cc5ca0;
+            case 0x22d8390: return 0x23e5d10;
+            case 0x3d9d990: return 0x3ec5540;
+            case 0x6be0020: return 0x6e52af0;
+            case 0x8e53718: return 0x912c3e8;
+            case 0x9af9078: return 0x9e26fd8;
+            case 0xb912690: return 0xbd0ce30;
+            case 0x8d804e8: return 0x9054b98;
+            case 0x8dfe2f8: return 0x90d4f88;
+            case 0x8edb0: return 0x8edb0;
+            case 0x10e390: return 0x115010;
+            case 0x356dd0: return 0x36edc0;
+            case 0xe5c720: return 0xea3e60;
+            case 0x2ba5330: return 0x2cbfc70;
+            case 0x2ba7940: return 0x2cc2270;
+            case 0x5240720: return 0x54becb0;
+            case 0x8dfb4b8: return 0x90d2148;
+            case 0x97ca198: return 0x9af3868;
+            case 0x88ad0: return 0x88ad0;
+            case 0x754330: return 0x77c4f0;
+            case 0x7544b0: return 0x77c670;
+            case 0x1a26440: return 0x1a6a4c0;
+            case 0x3866510: return 0x3957ed0;
+            case 0x8d9f958: return 0x9074e98;
+            default: return 0;
+        }
+    }
+    if (profile != 2) return 0;
+    switch (legacy) {
+        case 0x7a60: return 0x7a60;
+        case 0x45d10: return 0x45d10;
+        case 0x47220: return 0x47220;
+        case 0x47310: return 0x47310;
+        case 0x857a0: return 0x857a0;
+        case 0x88ad0: return 0x88ad0;
+        case 0x8edb0: return 0x8edb0;
+        case 0x9b5d0: return 0x9b5e0;
+        case 0x9f4b0: return 0x9f4c0;
+        case 0x10e390: return 0x113db0;
+        case 0x2fb010: return 0x30f450;
+        case 0x356dd0: return 0x36ca60;
+        case 0x36c740: return 0x3823d0;
+        case 0x389830: return 0x39f520;
+        case 0x4e6360: return 0x4fb6e0;
+        case 0x5309c0: return 0x545d40;
+        case 0x57fe90: return 0x595210;
+        case 0x6db150: return 0x6ef640;
+        case 0x6f4c70: return 0x709160;
+        case 0x6f4d90: return 0x709280;
+        case 0x754330: return 0x768820;
+        case 0x7544b0: return 0x7689a0;
+        case 0xe5c720: return 0xe83e20;
+        case 0xe7a8e0: return 0xea1fe0;
+        case 0x16da4f0: return 0x16eea90;
+        case 0x16f3390: return 0x17073a0;
+        case 0x178f100: return 0x17a3c20;
+        case 0x17b9010: return 0x17cde20;
+        case 0x1984610: return 0x1999b70;
+        case 0x198e2e0: return 0x19a3840;
+        case 0x1a26440: return 0x1a3bb90;
+        case 0x1bfb1c0: return 0x1c12a00;
+        case 0x229e790: return 0x230b9a0;
+        case 0x22d8390: return 0x23455a0;
+        case 0x2ba5330: return 0x2c15960;
+        case 0x2ba7940: return 0x2c17f60;
+        case 0x2bab360: return 0x2c1b980;
+        case 0x3866510: return 0x38bdda0;
+        case 0x3d9d990: return 0x3e22d70;
+        case 0x5240720: return 0x5380ef0;
+        case 0x54b02f0: return 0x55f0380;
+        case 0x6be0020: return 0x6cd09b0;
+        case 0x74ab89c: return 0x754bcdc;
+        case 0x74ab8e0: return 0x754bd20;
+        case 0x8d804e8: return 0x8f514e8;
+        case 0x8d9f958: return 0x8f71468;
+        case 0x8dfb4b8: return 0x8fce618;
+        case 0x8dfe2f8: return 0x8fd1468;
+        case 0x8e53588: return 0x9026b48;
+        case 0x8e53718: return 0x9026cd8;
+        case 0x90daff8: return 0x92b2d08;
+        case 0x910b378: return 0x92e30f8;
+        case 0x97ca198: return 0x99cb6f8;
+        case 0x9af9078: return 0x9cff818;
+        case 0xb912690: return 0xbb92fa0;
+
+        default: return 0; // No fallback to a stale RVA in an unknown mapping.
+    }
+}
+static uintptr_t core_address(uintptr_t base, uintptr_t legacy) {
+    const auto rva = core_rva(legacy);
+    return rva ? base + rva : 0;
+}
+
+// SNS interaction was verified only in 4.1.15.56. These are native profile-2
+// RVAs, not legacy targets; never reuse them in profile 1 or an unknown image.
+static uintptr_t core_sns_address(uintptr_t base, uintptr_t rva) {
+    if (!base || InterlockedCompareExchange(&core_profile_id, 0, 0) != 2) return 0;
+    static constexpr uintptr_t verified[] = {
+        0x5737070, 0x8f52418, 0x9a31818, 0xb9ba4b0, 0x95e00d8, 0x9195c08,
+        0x754cd50, 0x754cd70, 0xbb94b20, 0x108aee0, 0x49f2f0,
+        0x30640f0, 0x3065ac0, 0x43b1800, 0x914e2e8, 0x914e378
+    };
+    for (auto candidate : verified) if (candidate == rva) return base + rva;
+    return 0;
+}
+
+// The publishing RVAs are native 4.1.15.56 values; 4.2 has a separate map.
+static uintptr_t core_moments_address(uintptr_t base, uintptr_t rva) {
+    const LONG profile = InterlockedCompareExchange(&core_profile_id, 0, 0);
+    if (!base) return 0;
+    if (profile == 2) return base + rva;
+    if (profile == 4) {
+        switch (rva) {
+            case 0x44776d0: return base + 0x4539860;
+            case 0x9391028: return base + 0x949b9d8;
+            case 0x108aee0: return base + 0x10a6a70;
+            case 0x306ade0: return base + 0x312f680;
+            case 0x2236900: return base + 0x22ce0d0;
+            case 0xf10a00: return base + 0xf31950;
+            case 0x4a8950: return base + 0x4ac4c0;
+            case 0x4a8850: return base + 0x4ac3c0;
+            case 0x4a8cc0: return base + 0x4ac830;
+            case 0x19e0c40: return base + 0x1a0e1b0;
+            case 0x311640: return base + 0x3139d0;
+            case 0x90b60: return base + 0x90b60;
+            case 0x754bd18: return base + 0x76a53f8;
+            case 0x754cd48: return base + 0x76a6428;
+            case 0x754cd70: return base + 0x76a6450;
+            default: return 0;
+        }
+    }
+    if (profile != 3) return 0;
+    uintptr_t mapped = 0;
+    switch (rva) {
+        case 0x44776d0: mapped = 0x4538550; break;
+        case 0x9391028: mapped = 0x949aaa8; break;
+        case 0x108aee0: mapped = 0x10a7f20; break;
+        case 0x306ade0: mapped = 0x312de40; break;
+        case 0x2236900: mapped = 0x22ce660; break;
+        case 0xf10a00: mapped = 0xf32bd0; break;
+        case 0x4a8950: mapped = 0x4ad740; break;
+        case 0x4a8850: mapped = 0x4ad640; break;
+        case 0x4a8cc0: mapped = 0x4adab0; break;
+        case 0x19e0c40: mapped = 0x1a0ef00; break;
+        case 0x311640: mapped = 0x3139d0; break;
+        case 0x90b60: mapped = 0x90b60; break;
+        case 0x754bd18: mapped = 0x76a43f8; break;
+        case 0x754cd48: mapped = 0x76a5428; break;
+        case 0x754cd70: mapped = 0x76a5450; break;
+        default: return 0;
+    }
+    return base + mapped;
+}

@@ -1,0 +1,24 @@
+{
+  "name": "chat_summary",
+  "api": "v1",
+  "description": "使用配置的大模型总结当前群成员或全群当天聊天",
+  "entry": "__init__.py",
+  "requires": [
+    "group.text.receive",
+    "group.text.send"
+  ],
+  "scheduled_actions": [
+    {
+      "id": "group_summary",
+      "label": "总结群聊",
+      "method": "scheduled_group_summary",
+      "fields": [{"name": "chat_id", "label": "群 ID", "type": "chat", "required": true}]
+    }
+  ],
+  "business": [
+    {
+      "function": "Plugin.reply_summary",
+      "label": "生成并回复总结"
+    }
+  ]
+}

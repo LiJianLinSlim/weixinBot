@@ -1,0 +1,132 @@
+"""已核对的微信核心指纹与只读账号/缓存地址配置。
+
+指纹用于加载原生桥接前的版本校验；内存选择仅用于尚未注入时的账号发现，
+必须同时匹配全局对象、虚表、getter 和字段访问指令，不按版本字符串猜偏移。
+"""
+from __future__ import annotations
+
+from dataclasses import dataclass
+import struct
+from types import MappingProxyType
+from typing import Mapping
+
+
+class UnsupportedWeChatVersion(RuntimeError):
+    """发现微信，但当前构建未验证，不能作为未登录继续等待。"""
+
+
+@dataclass(frozen=True)
+class CoreProfile:
+    version: str
+    size: int
+    sha256: str
+    rvas: Mapping[int, int]
+    emoticon_cache_mask: bytes
+
+    def rva(self, legacy_rva: int) -> int:
+        """解析已验证的旧地址；未登记地址必须显式补充，不能假定未改变。"""
+        return self.rvas[legacy_rva]
+
+
+_LEGACY_RVAS = (
+    0xB912690, 0x8D804E8, 0x8DFE2F8, 0x469A0, 0x36F930,
+    0x36C7B0, 0x8F9BF98, 0x8FA2538, 0x8F9C228, 0x8FA3CB8, 0x8FA3C28,
+)
+_UPDATED_RVAS = (
+    0xBB92FA0, 0x8F514E8, 0x8FD1468, 0x469A0, 0x3855C0,
+    0x382440, 0x9171CF8, 0x9178258, 0x9171F88, 0x91799D8, 0x9179948,
+)
+
+_TEXT_42011_RVAS = MappingProxyType({
+    0xB912690: 0xBD0CE30, 0x8D804E8: 0x9054B98, 0x8DFE2F8: 0x90D4F88,
+    0x469A0: 0x469A0, 0x36F930: 0x387920, 0x36C7B0: 0x3847A0,
+    0x8F9BF98: 0x927A498, 0x8FA2538: 0x9280A38, 0x8F9C228: 0x927A728,
+    0x8FA3CB8: 0x92821B8, 0x8FA3C28: 0x9282128,
+})
+
+_TEXT_42012_RVAS = MappingProxyType({
+    0xB912690: 0xBD0CE30, 0x8D804E8: 0x9055B98, 0x8DFE2F8: 0x90D5F68,
+    0x469A0: 0x469A0, 0x36F930: 0x387920, 0x36C7B0: 0x3847A0,
+    0x8F9BF98: 0x927B3F8, 0x8FA2538: 0x9281968, 0x8F9C228: 0x927B688,
+    0x8FA3CB8: 0x92830E8, 0x8FA3C28: 0x9283058,
+})
+
+CORE_PROFILES = (
+    CoreProfile("4.1.15.13", 201552944,
+                "10f8e995453e2da46d4f2b5080cd6da1f13cc5147746adc119ceae38cb039de5",
+                MappingProxyType(dict(zip(_LEGACY_RVAS, _LEGACY_RVAS))),
+                bytes.fromhex("c9629058e9481a7d100824e418f6f17b2ceb0ce2d7e96e9dc00d3e8249539b96")),
+    CoreProfile("4.1.15.56", 204305968,
+                "e0428a7b691853de496532523c2c09aa095f90941c37c9f4cfb3f137f3c66556",
+                MappingProxyType(dict(zip(_LEGACY_RVAS, _UPDATED_RVAS))),
+                bytes.fromhex("2f209b4bd7379861af92bbbdd82d6d20b08ed928264de62da2c3dbd9b5997580")),
+    CoreProfile("4.2.0.11", 205929008,
+                "745cdf2955fa5128cdb00c056c97571156a5f107406a9bb15ac0754f3246b201",
+                _TEXT_42011_RVAS, b""),
+    CoreProfile("4.2.0.12", 205932072,
+                "2b3677c3f932daaa4ef84c8b2acd0aee12cbe5a779ff9e740c370761e5c291ce",
+                _TEXT_42012_RVAS, b""),
+    CoreProfile("4.2.0.50", 204027440,
+                "42d3ea2f4274b9e3b22ae0c55213789e9fc621ddf7991ab0a99cee2ea0bbedc1",
+                MappingProxyType({
+                    0xB912690: 0xBB4DE28, 0x8D804E8: 0x90070E8,
+                    0x8DFE2F8: 0x90B8D18, 0x469A0: 0x20920,
+                    0x36F930: 0x358360, 0x36C7B0: 0x3551E0,
+                }), b""),
+)
+
+
+# No unverified account-only builds are admitted to the native bridge.
+ACCOUNT_DISCOVERY_PROFILES = ()
+
+
+def profile_for_fingerprint(size: int, sha256: str) -> CoreProfile | None:
+    """只接受大小和 SHA256 同时匹配的已确认构建。"""
+    if type(size) is not int or not isinstance(sha256, str):
+        return None
+    return next((profile for profile in CORE_PROFILES
+                 if profile.size == size and profile.sha256 == sha256.lower()), None)
+
+
+def select_memory_profile(read_memory, core_base: int, *, profiles=None) -> CoreProfile | None:
+    """只读验证已知的账号对象链；未知、未就绪或出现歧义时返回 None。
+
+    不缓存 PID/地址，不读取个人资料。调用方仍须双读自身实际使用的结构，
+    并在任何注入/原生调用前独立核对完整 DLL 指纹。
+    """
+    def read(address, length):
+        if not 0x10000 <= address < 0x800000000000 or address + length >= 0x800000000000:
+            raise ValueError("核心对象指针未就绪")
+        value = read_memory(address, length)
+        if len(value) != length:
+            raise ValueError("核心对象读取不完整")
+        return value
+
+    def ptr(address):
+        return struct.unpack("<Q", read(address, 8))[0]
+
+    matches = []
+    for profile in CORE_PROFILES if profiles is None else profiles:
+        rva = profile.rva
+        try:
+            app = ptr(core_base + rva(0xB912690))
+            app_table = ptr(app)
+            if app_table != core_base + rva(0x8D804E8):
+                continue
+            if ptr(app_table + 0x60) != core_base + rva(0x469A0):
+                continue
+            context = ptr(app + 0x68)
+            table = ptr(context)
+            if table != core_base + rva(0x8DFE2F8):
+                continue
+            if ptr(table + 0x18) != core_base + rva(0x36F930):
+                continue
+            if read(core_base + rva(0x36F930), 5) != b"\x48\x8d\x41\x48\xc3":
+                continue
+            if (ptr(core_base + rva(0xB912690)) != app or ptr(app) != app_table or
+                    ptr(app + 0x68) != context or ptr(context) != table):
+                continue
+            matches.append(profile)
+        except (OSError, ValueError, struct.error):
+            continue
+    return matches[0] if len(matches) == 1 else None

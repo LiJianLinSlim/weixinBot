@@ -1,0 +1,94 @@
+{
+  "backend": "native_text",
+  "chat_allowlist": [],
+  "image_directory": ".runtime/images",
+  "file_directory": ".runtime/files",
+  "emoticon_directory": ".runtime/emoticons",
+  "wechat_data_directory": null,
+  "wechat_pid": null,
+  "wechat_account": null,
+  "reconnect_seconds": 5,
+  "plugin_queue_size": 128,
+  "console": true,
+  "log_level": "INFO",
+  "llm_config_file": "llm_config.json",
+  "tts_config_file": "tts_config.json",
+  "members_config_file": "members_config.json",
+  "text_send_delay": {
+    "enabled": true,
+    "characters_per_group": 10,
+    "min_seconds": 0.1,
+    "max_seconds": 0.3
+  },
+  "plugins": {
+    "anti_recall": {
+      "enabled": true
+    },
+    "anti_recall_image": {
+      "enabled": true
+    },
+    "anti_recall_file": {
+      "enabled": true
+    },
+    "anti_recall_voice": {
+      "enabled": true
+    },
+    "picture_idiom": {
+      "enabled": false,
+      "source": "ffapi",
+      "timeout_seconds": 8,
+      "wrong_reply_cooldown_seconds": 3
+    },
+    "voice_reply": {
+      "enabled": false
+    },
+    "group_notice": {
+      "enabled": false,
+      "welcome": true,
+      "leave_notice": true,
+      "welcome_template": "欢迎 {nickname} 加入群聊！",
+      "leave_template": "{nickname} 离开了群聊。"
+    },
+    "friend_auto_accept": {
+      "enabled": false,
+      "verification_keywords": []
+    },
+    "personality": {
+      "enabled": true
+    },
+    "mention_chat": {
+      "enabled": false
+    },
+    "chat_summary": {
+      "enabled": false
+    },
+    "chat_records": {
+      "enabled": true
+    },
+    "member_identity": {
+      "enabled": true
+    },
+    "idiom_chain": {
+      "enabled": false,
+      "member_names": {}
+    },
+    "id_responder": {
+      "enabled": true
+    },
+    "echo": {
+      "enabled": true,
+      "prefix": "echo "
+    },
+    "image_gallery": {
+      "enabled": true,
+      "source": "xxapi",
+      "commands": [
+        "/来张图",
+        "/美女"
+      ],
+      "cooldown_seconds": 10,
+      "timeout_seconds": 12,
+      "max_image_bytes": 10485760
+    }
+  }
+}

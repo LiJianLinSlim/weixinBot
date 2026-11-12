@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="helper-token" content="__HELPER_TOKEN__">
+  <meta name="color-scheme" content="light dark">
+  <title>helper · 本地管理台</title>
+  <link rel="icon" href="data:,">
+  <script src="/moments.js"></script>
+  <script src="/articles.js"></script>
+  <script src="/app.js"></script>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<a class="skip-link" href="#workspace">跳转到主要内容</a>
+<aside class="sidebar" id="primary-sidebar" aria-label="工作空间导航">
+  <a class="brand" href="#overview" aria-label="helper 管理台首页">helper</a>
+  <nav aria-label="主导航">
+    <a href="#overview" data-page="overview"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M3.5 9h17M9 9v11.5"/></svg>运行概览</a>
+    <a href="#plugins" data-page="plugins"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1"/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1"/><rect x="14" y="14" width="6.5" height="6.5" rx="1"/></svg>插件管理<span id="nav-plugin-count" class="nav-count">—</span></a>
+    <a href="#groups" data-page="groups"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="7.5" r="3"/><path d="M3.5 20v-3.5a5.5 5.5 0 0 1 11 0V20M16 4.5a3 3 0 0 1 0 6M17 13a5 5 0 0 1 3.5 4.8V20"/></svg>群聊与会话</a>
+    <a href="#tasks" data-page="tasks"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg>定时任务</a>
+    <a href="#contacts" data-page="contacts"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3.5" width="15.5" height="17" rx="2"/><path d="M3.5 7h3M3.5 12h3M3.5 17h3M10 17v-1a3.5 3.5 0 0 1 7 0v1"/><circle cx="13.5" cy="9" r="2.5"/></svg>联系人</a>
+    <a href="#moments" data-page="moments"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="8" cy="9" r="1.5"/><path d="m4 17 5-5 4 4 3-3 4 4"/></svg>朋友圈</a>
+    <a href="#articles" data-page="articles"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.5h14v17H5zM8 8h8M8 12h8M8 16h5"/></svg>公众号文章</a>
+    <a href="#models" data-page="models"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16M4 16h16"/><circle cx="9" cy="8" r="2.5"/><circle cx="15" cy="16" r="2.5"/></svg>模型与语音</a>
+    <a href="#logs" data-page="logs"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.1M4 12h.1M4 18h.1"/></svg>运行日志</a>
+  </nav>
+  <div class="sidebar-bottom"><a href="https://prometheus-first.github.io/helper/" target="_blank" rel="noreferrer">使用文档<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 14 14 6M6 6h8v8"/></svg></a></div>
+</aside>
+<button class="nav-backdrop hidden" id="nav-backdrop" aria-label="关闭导航"></button>
+<main id="workspace" tabindex="-1">
+  <header class="topbar">
+    <div class="workspace-location"><button id="nav-toggle" class="icon-button" aria-label="展开导航" aria-expanded="false" aria-controls="primary-sidebar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><span id="page-label" class="sr-only">运行概览</span></div>
+    <div class="robot-toolbar"><label for="robot-select">当前账号</label><select id="robot-select" aria-label="当前账号"><option value="default">默认机器人</option></select><button id="theme-toggle" class="secondary theme-switch" type="button" aria-label="切换到暗色" title="切换到暗色"><svg class="theme-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13a8.8 8.8 0 0 1-9.5-9.5A8.8 8.8 0 1 0 20.5 13Z"/></svg><svg class="theme-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6 19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></svg><span>暗色</span></button></div>
+  </header>
+  <div id="service-banner" class="banner hidden" role="status"></div>
+  <section class="page" id="page-overview" aria-labelledby="overview-heading">
+    <div class="page-heading"><div><h1 id="overview-heading">运行概览</h1></div></div>
+    <section class="account-picker" aria-labelledby="accounts-heading">
+      <div class="section-heading"><h2 id="accounts-heading">已登录微信 <span id="account-total" class="count">—</span></h2><div class="account-controls"><span id="account-selection-count" class="count">已选 0</span><button id="login-wechat" class="secondary" type="button">登录微信</button><button id="refresh-accounts" class="secondary">刷新账号</button><button id="start-selected" class="primary" disabled>启动所选</button></div></div>
+      <section id="wechat-login-panel" class="wechat-login hidden" aria-labelledby="wechat-login-heading">
+        <div class="wechat-login-top"><h3 id="wechat-login-heading">登录微信</h3><button id="close-wechat-login" class="text-button small" type="button">关闭</button></div>
+        <p id="wechat-login-status" role="status" aria-live="polite">正在启动微信…</p>
+        <img id="wechat-login-qr" class="wechat-login-qr hidden" alt="微信登录二维码，请用手机微信扫描">
+      </section>
+      <div class="table-container"><table class="account-table"><thead><tr><th scope="col"><span class="sr-only">选择</span></th><th scope="col">微信账号</th><th scope="col">进程</th><th scope="col">状态</th><th scope="col"><span class="sr-only">操作</span></th></tr></thead><tbody id="account-list"><tr><td colspan="5" class="table-empty">正在识别账号…</td></tr></tbody></table></div>
+      <p id="account-error" class="account-error hidden" role="status"></p>
+      <div id="batch-result" class="batch-result hidden" role="status" aria-live="polite"></div>
+    </section>
+    <section class="section message-monitor" aria-labelledby="messages-heading">
+      <div class="section-heading"><h2 id="messages-heading">消息监控 <span id="message-count" class="count">0 条</span></h2><div class="message-actions"><button id="pause-messages" class="secondary small">暂停滚动</button><button id="clear-messages" class="text-button small">清空视图</button></div></div>
+      <label class="sr-only" for="message-search">搜索消息</label><input id="message-search" class="message-search" type="search" placeholder="搜索 ID、昵称或内容" autocomplete="off">
+      <p id="message-error" class="account-error hidden" role="status"></p>
+      <div id="message-scroll" class="table-container message-scroll" tabindex="0" aria-label="实时消息列表"><table class="message-table"><thead><tr><th scope="col">时间</th><th scope="col">会话 ID</th><th scope="col">发送者</th><th scope="col">消息内容</th></tr></thead><tbody id="message-list"><tr><td colspan="4" class="table-empty">正在读取消息…</td></tr></tbody></table></div>
+    </section>
+  </section>
+  <section class="page hidden" id="page-plugins" aria-labelledby="plugins-heading">
+    <div class="page-heading"><div><h1 id="plugins-heading">插件管理</h1></div><label class="search"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5"/><path d="m12 12 4.5 4.5"/></svg><input id="plugin-search" placeholder="搜索插件" aria-label="搜索插件"></label></div>
+    <div class="table-container"><table class="plugin-table"><thead><tr><th scope="col">插件</th><th scope="col">功能说明</th><th scope="col">状态</th><th scope="col">操作</th></tr></thead><tbody id="plugin-list"><tr><td colspan="4" class="table-empty">正在读取插件列表…</td></tr></tbody></table></div>
+  </section>
+  <section class="page hidden" id="page-groups" aria-labelledby="groups-heading">
+    <div class="page-heading"><div><h1 id="groups-heading">群聊与会话</h1></div><button id="discover-chats" class="secondary">发现群聊</button></div>
+    <section class="settings-section manual-send" aria-labelledby="send-heading">
+      <div class="section-heading"><h2 id="send-heading">发送消息</h2><button id="refresh-send-chats" class="secondary small" type="button">刷新会话</button></div>
+      <form id="send-form">
+        <label for="send-chat">会话</label><select id="send-chat" required><option value="">选择会话</option></select>
+        <div id="send-group" class="hidden">
+          <div class="section-heading member-heading"><h3>艾特成员 <span id="mention-count" class="count">已选 0 / 8</span></h3><button id="refresh-send-members" class="text-button small" type="button">刷新成员</button></div>
+          <label class="sr-only" for="member-search">搜索群成员</label><input id="member-search" type="search" placeholder="搜索昵称、微信 ID 或身份" autocomplete="off">
+          <div class="table-container member-scroll"><table class="member-table"><thead><tr><th scope="col"><span class="sr-only">选择</span></th><th scope="col">群成员</th><th scope="col">身份</th></tr></thead><tbody id="send-members"><tr><td colspan="3" class="table-empty">请先选择群聊。</td></tr></tbody></table></div>
+        </div>
+        <label for="send-content">正文</label><textarea id="send-content" rows="3" required placeholder="输入文字" spellcheck="false"></textarea>
+        <div class="form-footer"><p id="send-status" class="send-status" role="status" aria-live="polite"></p><button id="send-text" class="primary" type="submit" disabled>发送</button></div>
+      </form>
+    </section>
+    <div class="settings-columns"><form id="groups-form" class="settings-section"><div class="section-heading"><div><h2>支持的群聊</h2></div></div><label for="group-ids">群 ID（每行一个）</label><textarea id="group-ids" name="groups" rows="7" placeholder="12345678@chatroom" spellcheck="false"></textarea><div id="group-name-list" class="group-name-list" aria-label="群聊备注"></div><div class="check-row"><label><input type="checkbox" name="history_enabled">记录当天文字</label><label><input type="checkbox" name="daily_clear">每天零点清理旧记录</label></div><div class="form-footer"><span class="save-hint">停止后保存，下次启动生效</span><button class="primary" type="submit">保存群聊配置</button></div></form><section class="settings-section discovered-section"><h2>已发现的群</h2><div id="discovered-chats" class="empty">暂无已接收消息的群。</div></section></div>
+    <form id="scope-form" class="settings-section scope-section"><div class="section-heading"><div><h2>收发会话白名单</h2></div></div><label for="scope-ids">会话 ID（每行一个）</label><textarea id="scope-ids" name="chat_allowlist" rows="4" placeholder="留空允许全部会话" spellcheck="false"></textarea><details class="help-details"><summary>白名单与群配置的关系</summary><p>白名单非空时，支持群会自动加入。屏蔽群需从两处移除。</p></details><div class="form-footer"><span class="save-hint">停止后保存</span><button class="primary" type="submit">保存白名单</button></div></form>
+  </section>
+  <section class="page hidden" id="page-tasks" aria-labelledby="tasks-heading">
+    <div class="page-heading"><h1 id="tasks-heading">定时任务</h1></div>
+    <form id="task-form" class="settings-section">
+      <h2 id="task-form-heading">新建任务</h2>
+      <input type="hidden" name="id">
+      <label>任务名称<input name="name" maxlength="100" required placeholder="例如：早安提醒"></label>
+      <label>任务类型<select name="action_id" id="task-action" required><option value="">正在读取任务类型…</option></select></label>
+      <datalist id="task-chat-options"></datalist>
+      <div id="task-parameters"></div>
+      <div class="field-pair"><label>执行方式<select name="kind"><option value="interval">按间隔</option><option value="daily">每天指定时间</option><option value="once">指定日期时间（一次）</option></select></label><label id="task-interval-label">间隔（分钟）<input name="interval_minutes" type="number" min="1" max="525600" step="1" value="5"></label><label id="task-time-label" class="hidden">每天发送时间<input name="daily_time" type="time" value="09:00"></label><label id="task-once-label" class="hidden">发送日期和时间<input name="send_at" type="datetime-local" step="1"></label></div>
+      <label id="task-first-label">首次／下次发送时间（可选）<input name="first_run" type="datetime-local" step="1"><span id="task-first-hint" class="note">留空则在一个间隔后首次发送；选择后从该时间开始按间隔执行。</span></label>
+      <div id="task-window-options">
+        <label class="inline"><input name="window_enabled" type="checkbox">限制每天执行时段</label>
+        <div id="task-window-fields" class="hidden">
+          <div class="field-pair"><label>每天开始时间<input name="window_start" type="time" value="09:00"></label><label>每天结束时间<input name="window_end" type="time" value="22:00"></label></div>
+          <p class="note">每天从开始时间按间隔执行，结束时间起停止发送；支持跨午夜。例如 09:00–22:00、间隔120分钟，会在09:00、11:00…21:00执行。离线错过不补发；“立即执行”不受时段限制。</p>
+        </div>
+      </div>
+      <label class="inline"><input name="enabled" type="checkbox" checked>启用任务</label>
+      <div class="form-footer"><span class="note">按电脑本地时间执行；离线期间错过的任务不会补发。只改文案保留原定时间；立即执行不改变定时计划。</span><div><button id="task-cancel" class="text-button hidden" type="button">取消编辑</button><button id="task-save" class="primary" type="submit">保存任务</button></div></div>
+    </form>
+    <section class="section" aria-labelledby="task-list-heading"><div class="section-heading"><h2 id="task-list-heading">任务列表</h2><button id="task-refresh" class="secondary small" type="button">刷新</button></div><p id="task-status" class="account-error" role="status" aria-live="polite"></p><div class="table-container"><table class="task-table"><thead><tr><th>任务与会话</th><th>执行时间</th><th>状态</th><th>操作</th></tr></thead><tbody id="task-list"><tr><td colspan="4" class="table-empty">暂无任务。</td></tr></tbody></table></div></section>
+  </section>
+  <section class="page hidden" id="page-contacts" aria-labelledby="contacts-heading">
+    <div class="page-heading"><h1 id="contacts-heading">联系人 <span id="contact-count" class="count"></span></h1><button id="scan-contacts" class="primary" type="button" disabled>扫描联系人</button></div>
+    <div class="contact-filters">
+      <label class="search"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5"/><path d="m12 12 4.5 4.5"/></svg><input id="contact-search" type="search" placeholder="搜索昵称、备注、微信号、wxid 或标签" aria-label="搜索联系人" autocomplete="off" disabled></label>
+      <label class="contact-filter"><span class="sr-only">筛选好友标签</span><select id="contact-tag" aria-label="筛选好友标签" disabled><option value="">全部标签</option></select></label>
+    </div>
+    <p id="contact-status" class="contact-status" role="status" aria-live="polite">请先启动并连接当前账号。</p>
+    <div class="table-container"><table class="contact-table"><thead><tr><th scope="col">联系人</th><th scope="col">微信号</th><th scope="col">好友标签</th><th scope="col"><span class="sr-only">操作</span></th></tr></thead><tbody id="contact-list"><tr><td colspan="4" class="table-empty">连接后点击“扫描联系人”。</td></tr></tbody></table></div>
+    <div id="contact-pagination" class="contact-pagination hidden"><span id="contact-page" class="count"></span><div><button id="contact-previous" class="secondary small" type="button">上一页</button><button id="contact-next" class="secondary small" type="button">下一页</button></div></div>
+  </section>
+  <section class="page hidden" id="page-moments" aria-labelledby="moments-heading">
+    <div class="page-heading"><h1 id="moments-heading">朋友圈</h1></div>
+    <form id="moments-form" class="settings-section moments-composer">
+      <div id="moments-single-account" class="moments-identity"></div>
+      <label id="moments-account-field" class="hidden" for="moments-account">操作账号<select id="moments-account"><option value="">选择运行中的机器人</option></select></label>
+      <p id="moments-availability" class="editor-status" role="status">请先启动并连接机器人。</p>
+      <label for="moments-content">正文<textarea id="moments-content" rows="7" maxlength="2000" placeholder="写点什么…"></textarea></label>
+      <div class="moments-image-actions"><label for="moments-images" class="secondary moments-file-label">添加图片<input id="moments-images" type="file" accept="image/jpeg,image/png" multiple></label><span id="moments-counter" class="count">0 / 1000 字 · 0 / 9 张</span></div>
+      <div id="moments-image-list" class="moments-images"></div>
+      <label class="moments-visibility" for="moments-visibility">谁可以看<select id="moments-visibility"><option value="public">公开</option><option value="private">仅自己可见</option></select></label>
+      <p id="moments-feedback" class="editor-status" role="status" aria-live="polite"></p>
+      <div class="form-footer"><button type="button" id="moments-clear" class="text-button">清空草稿</button><button id="moments-preview" type="submit" class="primary" disabled>预览</button></div>
+    </form>
+    <section class="moments-timeline" aria-labelledby="moments-timeline-heading">
+      <div class="section-heading"><h2 id="moments-timeline-heading">已加载的朋友圈</h2><button type="button" id="moments-read" class="secondary" disabled>读取列表</button></div>
+      <p class="editor-status">先在电脑微信打开朋友圈，再读取当前已加载的记录。最多显示 20 条。</p>
+      <p id="moments-read-status" class="editor-status" role="status" aria-live="polite">尚未读取。</p>
+      <div id="moments-timeline-list"></div>
+    </section>
+  </section>
+  <section class="page hidden" id="page-articles" aria-labelledby="articles-heading">
+    <div class="page-heading"><h1 id="articles-heading">公众号文章</h1><button id="articles-refresh" class="secondary" type="button">刷新公众号</button></div>
+    <p id="articles-identity" class="articles-identity"></p>
+    <details class="articles-manual"><summary>按名称手动同步</summary><form id="articles-form" class="articles-toolbar">
+      <label for="articles-publisher">公众号<input id="articles-publisher" list="articles-publishers" placeholder="昵称、微信号或 gh 开头的 ID" autocomplete="off" required><datalist id="articles-publishers"></datalist></label>
+      <button id="articles-read" class="primary" type="submit" disabled>同步文章列表</button>
+    </form></details>
+    <p class="articles-help">自动读取当前账号已关注的公众号，点击公众号同步文章，点击文章加载正文和图片。请保持微信登录，读取时可能出现阅读窗口。</p>
+    <p id="articles-availability" class="editor-status" role="status" aria-live="polite"></p>
+    <p id="articles-status" class="articles-status" role="status" aria-live="polite"></p>
+    <section id="articles-library" class="articles-library" aria-labelledby="articles-publishers-heading">
+      <div class="section-heading"><h2 id="articles-publishers-heading">公众号 <span id="articles-publisher-count" class="count"></span></h2></div>
+      <p id="articles-publishers-status" class="articles-status" role="status" aria-live="polite"></p>
+      <label class="search articles-publisher-search"><input id="articles-publisher-search" type="search" placeholder="搜索公众号" aria-label="搜索本地公众号"></label>
+      <ul id="articles-publisher-list" class="articles-publisher-list"></ul>
+    </section>
+    <nav id="articles-breadcrumb" class="articles-breadcrumb hidden" aria-label="文章层级">
+      <button id="articles-back" class="secondary small" type="button">← 全部公众号</button>
+      <span aria-hidden="true">/</span><strong id="articles-current-publisher" aria-current="page"></strong>
+      <button id="articles-sync-current" class="secondary small" type="button" disabled>同步文章</button>
+    </nav>
+    <div id="articles-content" class="articles-columns hidden">
+      <section class="articles-directory" aria-labelledby="articles-list-heading">
+        <div class="section-heading"><h2 id="articles-list-heading">文章 <span id="articles-count" class="count"></span></h2></div>
+        <label class="search"><input id="articles-search" type="search" placeholder="搜索当前公众号的文章" aria-label="搜索当前公众号的文章"></label>
+        <ul id="articles-list" class="articles-list"></ul>
+      </section>
+      <section class="articles-reader" aria-label="文章阅读">
+        <p id="article-empty" class="articles-empty">从左侧选择一篇文章。</p>
+        <article id="article-detail" class="hidden">
+          <div class="article-heading"><h2 id="article-title"></h2><p id="article-meta" class="article-meta"></p></div>
+          <div class="article-actions"><button id="article-read" class="secondary small" type="button" disabled>读取正文</button><button id="article-export" class="secondary small" type="button" disabled>导出 Markdown</button></div>
+          <p id="article-status" class="articles-status" role="status" aria-live="polite"></p>
+          <div id="article-preview" class="article-preview"></div>
+          <details class="article-source"><summary>查看 Markdown</summary><label for="article-markdown" class="sr-only">只读 Markdown</label><textarea id="article-markdown" rows="16" readonly spellcheck="false"></textarea></details>
+          <details id="article-origin" class="article-source hidden"><summary>微信来源</summary><a id="article-original" target="_blank" rel="noreferrer noopener">在微信打开来源页面</a></details>
+        </article>
+      </section>
+    </div>
+  </section>
+  <section class="page hidden" id="page-models" aria-labelledby="models-heading">
+    <div class="page-heading"><div><h1 id="models-heading">模型与语音</h1></div></div>
+    <div class="model-columns"><form id="llm-form" class="settings-section model-form"><h2>大模型</h2><label>接口地址<input name="base_url" type="url" required spellcheck="false"></label><label for="llm-model-picker">模型</label>
+<div class="model-picker-row"><select id="llm-model-picker" aria-describedby="llm-model-status"><option value="">正在读取模型…</option></select><button id="refresh-llm-models" class="secondary" type="button">刷新列表</button></div>
+<p id="llm-model-status" class="model-list-status" role="status">从已保存的接口读取可用模型。</p>
+<label id="llm-model-custom" class="hidden">手动填写模型名称<input id="llm-model" name="model" required spellcheck="false" autocomplete="off"></label><label>API 密钥 <span class="key-state"></span><input name="api_key" type="password" autocomplete="new-password" placeholder="留空保留已有密钥"></label><details class="advanced-settings"><summary>高级选项</summary><div class="field-pair"><label>超时（秒）<input name="timeout_seconds" type="number" min="1" max="60" required></label><label>最大 tokens<input name="max_tokens" type="number" min="128" max="4096" required></label></div><label>令牌参数<select name="token_limit_parameter"><option value="max_tokens">max_tokens</option><option value="max_completion_tokens">max_completion_tokens</option></select></label><label class="inline"><input name="json_mode" type="checkbox">启用 JSON 模式</label><label>扩展参数（JSON）<textarea name="extra_body" rows="4" spellcheck="false" placeholder="{}"></textarea></label><label class="inline clear-key"><input name="clear_api_key" type="checkbox">清除已保存的密钥</label></details><div class="form-footer"><span class="save-hint">停止后保存</span><button class="primary" type="submit">保存大模型配置</button></div></form><form id="tts-form" class="settings-section model-form"><h2>Fish Audio 语音</h2><label>接口地址<input name="base_url" type="url" required spellcheck="false"></label><label>语音模型<input name="model" required spellcheck="false"></label><label>API 密钥 <span class="key-state"></span><input name="api_key" type="password" autocomplete="new-password" placeholder="留空保留已有密钥"></label><label>默认音色 ID<input name="default_voice" placeholder="可留空，在群中选择" spellcheck="false"></label><details class="advanced-settings"><summary>高级选项</summary><div class="field-pair"><label>超时（秒）<input name="timeout_seconds" type="number" min="1" max="120" required></label><label>每段字数<input name="max_chars_per_clip" type="number" min="20" max="180" required></label></div><label class="inline clear-key"><input name="clear_api_key" type="checkbox">清除已保存的密钥</label></details><div class="form-footer"><span class="save-hint">停止后保存</span><button class="primary" type="submit">保存语音配置</button></div></form></div>
+    <form id="delay-form" class="settings-section"><h2>文本发送节奏</h2><label class="inline"><input name="enabled" type="checkbox">启用随机等待</label><div class="field-pair three"><label>每组字符数<input name="characters_per_group" type="number" min="1" required></label><label>最短等待（秒）<input name="min_seconds" type="number" step="0.01" min="0" required></label><label>最长等待（秒）<input name="max_seconds" type="number" step="0.01" min="0" required></label></div><div class="form-footer"><span class="save-hint">停止后保存</span><button class="primary" type="submit">保存发送节奏</button></div></form>
+  </section>
+  <section class="page hidden" id="page-logs" aria-labelledby="logs-heading">
+    <div class="page-heading"><div><h1 id="logs-heading">运行日志</h1></div></div>
+    <div class="log-toolbar"><label for="log-level">日志级别</label><select id="log-level"><option value="ALL">全部级别</option><option value="WARNING">警告和错误</option><option value="ERROR">仅错误</option></select><span id="log-count">0 条</span><div class="log-actions"><button id="pause-logs" class="secondary">暂停滚动</button><button id="clear-logs" class="text-button">清空视图</button></div></div>
+    <div class="log-list" id="log-list" role="log" aria-label="实时日志" aria-live="off"><div class="log-empty">暂无日志。</div></div>
+  </section>
+
+</main>
+<div id="toast" class="toast hidden" role="status"></div>
+<dialog id="moments-confirm" class="moments-confirm" aria-labelledby="moments-confirm-title">
+  <div class="dialog-heading"><h2 id="moments-confirm-title">发布朋友圈</h2><button type="button" id="moments-cancel" class="text-button" aria-label="关闭预览">取消</button></div>
+  <p id="moments-preview-account" class="moments-identity"></p>
+  <p id="moments-preview-visibility" class="count"></p>
+  <div id="moments-preview-content" class="moments-preview-content"></div>
+  <div id="moments-preview-images" class="moments-images"></div>
+  <p id="moments-confirm-error" class="dialog-error hidden" role="alert"></p>
+  <div class="form-footer"><button type="button" id="moments-publish" class="primary">发布</button></div>
+</dialog>
+<dialog id="plugin-dialog" class="plugin-editor" aria-labelledby="plugin-dialog-title">
+  <form id="plugin-form">
+    <div class="dialog-heading"><h2 id="plugin-dialog-title">插件配置</h2><button type="button" class="icon-button" id="close-plugin-dialog" aria-label="关闭编辑器"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15"/></svg></button></div>
+    <p id="plugin-editor-scope" class="editor-scope"></p>
+    <div class="editor-tabs" role="tablist" aria-label="插件编辑内容"><button type="button" id="plugin-code-tab" role="tab" aria-selected="true" aria-controls="plugin-code-panel">业务代码</button><button type="button" id="plugin-options-tab" role="tab" aria-selected="false" aria-controls="plugin-options-panel" tabindex="-1">配置</button></div>
+    <div id="plugin-code-panel" role="tabpanel" aria-labelledby="plugin-code-tab">
+      <div class="editor-filebar"><label for="plugin-function">处理函数</label><span id="plugin-current-function" class="editor-current-function hidden"></span><select id="plugin-function" aria-label="业务函数"></select><button type="button" class="text-button small" id="reload-plugin-source">重新读取</button></div>
+      <label for="plugin-source" class="sr-only">业务函数代码</label>
+      <div class="code-editor"><pre id="plugin-line-numbers" aria-hidden="true"></pre><textarea id="plugin-source" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off" aria-describedby="plugin-editor-status"></textarea></div>
+    </div>
+    <div id="plugin-options-panel" class="hidden" role="tabpanel" aria-labelledby="plugin-options-tab"><label for="plugin-options" class="editor-options-label">插件选项（JSON）</label><textarea id="plugin-options" name="options" rows="14" spellcheck="false" wrap="off" aria-describedby="plugin-editor-status"></textarea></div>
+    <p id="plugin-editor-status" class="editor-status" role="status">正在读取…</p>
+    <p class="dialog-error hidden" role="alert"></p>
+    <div id="plugin-reset-confirm" class="editor-reset-confirm hidden"><p>恢复此插件的默认代码和配置？当前修改会被替换，聊天记录保留。</p><div><button type="button" class="secondary small" id="cancel-plugin-reset">取消</button><button type="button" class="secondary small danger-text" id="confirm-plugin-reset">确认重置</button></div></div>
+    <div class="editor-footer"><button type="button" class="text-button danger-text" id="reset-plugin-source">重置插件</button><button type="submit" class="primary" id="save-plugin-source">保存并生效</button></div>
+  </form>
+</dialog>
+</body>
+</html>
